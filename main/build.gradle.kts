@@ -37,8 +37,16 @@ android {
 
 dependencies {
 
-    implementation("com.android.support:appcompat-v7:28.0.0")
+    //implementation("com.android.support:appcompat-v7:28.0.0")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.material)
+    implementation(libs.androidx.fragment.ktx)
     testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("com.android.support.test:runner:1.0.2")
-    androidTestImplementation("com.android.support.test.espresso:espresso-core:3.0.2")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    //androidTestImplementation("com.android.support.test:runner:1.0.2")
+    //androidTestImplementation("com.android.support.test.espresso:espresso-core:3.0.2")
 }
