@@ -79,12 +79,18 @@ fun ColorSearchScreen() {
                         val searchColor = inputText.trim().lowercase()
                         val foundColor = colorMap[searchColor]
 
-                        if (foundColor != null) {
+                        if (foundColor != null)
+                        {
                             buttonBackgroundColor = foundColor
                         }
-                        else {
+                        else
+                        {
                             buttonBackgroundColor = defaultButtonColor
-                            Log.d("ColorSearch", "The color '$inputText' was not found.")
+
+                            val availableColors = colorMap.keys.joinToString(separator = ", ") { "'$it'" }
+                            Log.d(
+                                "ColorSearch",
+                                "The color '$inputText' was not found. Available colors: $availableColors.")
                         }
                     },
                     modifier = Modifier
