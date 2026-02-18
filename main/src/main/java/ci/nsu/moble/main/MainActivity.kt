@@ -13,6 +13,8 @@ import ci.nsu.moble.main.ui.theme.PracticeTheme
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -33,13 +35,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-//@Composable
-//fun Greeting(name: String, modifier: Modifier = Modifier) {
-//    Text(
-//        text = "Hello $name!",
-//        modifier = modifier
-//    )
-//}
 
 @Composable
 fun ColorSearchScreen() {
@@ -48,9 +43,9 @@ fun ColorSearchScreen() {
         "orange" to Color(0xFFFF9800),
         "yellow" to Color.Yellow,
         "green" to Color.Green,
-        "magenta" to Color.Magenta,
+        "cyan" to Color.Cyan,
         "blue" to Color.Blue,
-        "cyan" to Color.Cyan
+        "magenta" to Color.Magenta,
     )
 
 
@@ -109,7 +104,49 @@ fun ColorSearchScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
+                ColorPalette(colorMap = colorMap)
+
             }
         }
     )
+}
+
+@Composable
+fun ColorPalette(colorMap: Map<String, Color>) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+
+        colorMap.forEach { (colorName, colorValue) ->
+            ColorItem(
+                colorName = colorName,
+                colorValue = colorValue
+            )
+        }
+    }
+}
+
+@Composable
+fun ColorItem(
+    colorName: String,
+    colorValue: Color
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .background(
+                color = colorValue,
+                shape = RoundedCornerShape(12.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = colorName,
+            fontSize = 24.sp,
+            color = Color.Black,
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
 }
