@@ -4,14 +4,22 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout. *
+
+import androidx.compose.material3. *
+import androidx.compose.runtime. *
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import ci.nsu.moble.main.ui.theme.PracticeTheme
+
+import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,29 +27,89 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PracticeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                ColorSearchScreen()
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+//@Composable
+//fun Greeting(name: String, modifier: Modifier = Modifier) {
+//    Text(
+//        text = "Hello $name!",
+//        modifier = modifier
+//    )
+//}
 
-@Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
-    PracticeTheme {
-        Greeting("Android")
-    }
+fun ColorSearchScreen() {
+    val colorMap = mapOf(
+        "red" to Color.Red,
+        "orange" to Color(0xFFFF9800),
+        "yellow" to Color.Yellow,
+        "green" to Color.Green,
+        "magenta" to Color.Magenta,
+        "blue" to Color.Blue,
+        "cyan" to Color.Cyan
+    )
+
+
+    val defaultButtonColor = Color.LightGray
+    var buttonBackgroundColor  by remember { mutableStateOf(defaultButtonColor) }
+
+    var inputText by remember { mutableStateOf("") }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        content = { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                TextField(
+                    value = inputText,
+                    onValueChange = { inputText = it },
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+
+                Button(
+                    onClick = {
+                        val searchColor = inputText.trim().lowercase()
+                        val foundColor = colorMap[searchColor]
+
+                        if (foundColor != null) {
+                            buttonBackgroundColor = foundColor
+                        }
+                        else {
+                            buttonBackgroundColor = defaultButtonColor
+                            Log.d("ColorSearch", "The color '$inputText' was not found.")
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(buttonBackgroundColor),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = buttonBackgroundColor
+                    )
+                )
+                {
+                    Text(
+                        text = "Apply color",
+                        fontSize = 18.sp,
+                    //    color = if (buttonBackgroundColor == defaultButtonColor) Color.White else Color.Black
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+            }
+        }
+    )
 }
