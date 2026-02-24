@@ -13,9 +13,13 @@ import androidx.compose.ui.Modifier
 import ci.nsu.moble.main.ui.theme.PracticeTheme
 
 
+import android.content.Intent
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 
@@ -29,15 +33,37 @@ class SecondActivity : ComponentActivity() {
 
         setContent {
             PracticeTheme {
-                SecondScreen(receivedData)
+                SecondScreenWithTopBar(receivedData, this)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SecondScreen(receivedData: String) {
+fun SecondScreenWithTopBar(receivedData: String, activity: SecondActivity) {
+    val context = LocalContext.current
+
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Second Activity") },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        val intent = Intent(context, MainActivity::class.java).apply {
+                            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                        }
+                        context.startActivity(intent)
+                        activity.finish()
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                }
+            )
+        },
         modifier = Modifier.fillMaxSize()
     ) { innerPadding ->
         Column(
@@ -49,7 +75,7 @@ fun SecondScreen(receivedData: String) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Recieved from mainActivity: ",
+                text = "Received from mainActivity: ",
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
