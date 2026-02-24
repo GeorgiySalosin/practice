@@ -51,7 +51,9 @@ fun MainScreen() {
         ) {
             Button(
                 onClick = {
-                    val intent = Intent(context, SecondActivity::class.java)
+                    val intent = Intent(context, SecondActivity::class.java).apply {
+                        putExtra("key_data", "Hello from MainActivity!")
+                    }
                     context.startActivity(intent)
                 }
             ) {
