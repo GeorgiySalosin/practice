@@ -35,19 +35,17 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
+val colorMap = mapOf(
+    "red" to Color.Red,
+    "orange" to Color(0xFFFF9800),
+    "yellow" to Color.Yellow,
+    "green" to Color.Green,
+    "cyan" to Color.Cyan,
+    "blue" to Color.Blue,
+    "magenta" to Color.Magenta,
+)
 @Composable
 fun ColorSearchScreen() {
-    val colorMap = mapOf(
-        "red" to Color.Red,
-        "orange" to Color(0xFFFF9800),
-        "yellow" to Color.Yellow,
-        "green" to Color.Green,
-        "cyan" to Color.Cyan,
-        "blue" to Color.Blue,
-        "magenta" to Color.Magenta,
-    )
-
 
     val defaultButtonColor = Color.LightGray
     var buttonBackgroundColor  by remember { mutableStateOf(defaultButtonColor) }
@@ -110,7 +108,7 @@ fun ColorSearchScreen() {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                ColorPalette(colorMap = colorMap)
+                ColorPalette()
 
             }
         }
@@ -118,7 +116,7 @@ fun ColorSearchScreen() {
 }
 
 @Composable
-fun ColorPalette(colorMap: Map<String, Color>) {
+fun ColorPalette() {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth()
