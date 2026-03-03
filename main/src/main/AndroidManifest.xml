@@ -9,6 +9,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Draft">
         <activity
+            android:name=".HomeScreen"
+            android:exported="false"
+            android:label="@string/title_activity_home_screen"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".Screen"
+            android:exported="false"
+            android:label="@string/title_activity_screen"
+            android:theme="@style/Theme.Draft" />
+        <activity
             android:name=".SecondActivity"
             android:exported="false"
             android:label="@string/title_activity_second"

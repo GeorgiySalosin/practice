@@ -21,43 +21,108 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 
+import androidx.compose.runtime.*
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             PracticeTheme {
-                MainScreen()
+                SimpleNavigation()
                 }
             }
         }
     }
 
 
+//@Composable
+//fun MainScreen() {
+//    val context = LocalContext.current
+//
+//    Scaffold(
+//        modifier = Modifier.fillMaxSize()
+//    ) { innerPadding ->
+//        Column(
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(innerPadding)
+//                .padding(16.dp),
+//            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.Center
+//        ) {
+//            Button(
+//                onClick = {
+//                    val intent = Intent(context, SecondActivity::class.java).apply {
+//                        putExtra("key_data", "Hello from MainActivity!")
+//                    }
+//                    context.startActivity(intent)
+//                }
+//            ) {
+//                Text("go to SecondActivity")
+//            }
+//        }
+//    }
+//}
+
 @Composable
-fun MainScreen() {
-    val context = LocalContext.current
+fun SimpleNavigation() {
+    val navController = rememberNavController()
+
+    // Список экранов из sealed class
+    val screens = listOf(
+        Screen.Home
+    )
 
     Scaffold(
-        modifier = Modifier.fillMaxSize()
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Button(
-                onClick = {
-                    val intent = Intent(context, SecondActivity::class.java).apply {
-                        putExtra("key_data", "Hello from MainActivity!")
-                    }
-                    context.startActivity(intent)
+        bottomBar = {
+            NavigationBar {
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = navBackStackEntry?.destination?.route
+
+                screens.forEach { screen ->
+                    NavigationBarItem(
+                        // Без иконок, только текст
+                        label = {
+                            Text(
+                                text = when (screen) {
+                                    is Screen.Home -> "Главная"
+                                }
+                            )
+                        },
+                        // Для иконки используем пустой компонент, так как параметр обязателен
+                        icon = {},
+                        selected = currentRoute == screen.route,
+                        onClick = {
+                            // Навигация с использованием sealed class
+                            navController.navigate(screen.route) {
+                                // Очищаем стек до начального пункта назначения
+                                popUpTo(navController.graph.startDestinationId) {
+                                    saveState = true
+                                }
+                                // Избегаем множественных копий
+                                launchSingleTop = true
+                                // Восстанавливаем состояние
+                                restoreState = true
+                            }
+                        }
+                    )
                 }
-            ) {
-                Text("go to SecondActivity")
+            }
+        }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = Screen.Home.route,
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable(Screen.Home.route) {
+                HomeScreen()
             }
         }
     }
