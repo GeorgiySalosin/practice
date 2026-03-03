@@ -9,6 +9,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Draft">
         <activity
+            android:name=".ProfileScreen"
+            android:exported="false"
+            android:label="@string/title_activity_profile_screen"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".SettingsScreen"
+            android:exported="false"
+            android:label="@string/title_activity_settings_screen"
+            android:theme="@style/Theme.Draft" />
+        <activity
             android:name=".HomeScreen"
             android:exported="false"
             android:label="@string/title_activity_home_screen"

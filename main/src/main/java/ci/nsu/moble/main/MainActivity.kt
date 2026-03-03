@@ -34,52 +34,27 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             PracticeTheme {
-                SimpleNavigation()
+                MainScreen()
                 }
             }
         }
     }
 
 
-//@Composable
-//fun MainScreen() {
-//    val context = LocalContext.current
-//
-//    Scaffold(
-//        modifier = Modifier.fillMaxSize()
-//    ) { innerPadding ->
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(innerPadding)
-//                .padding(16.dp),
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.Center
-//        ) {
-//            Button(
-//                onClick = {
-//                    val intent = Intent(context, SecondActivity::class.java).apply {
-//                        putExtra("key_data", "Hello from MainActivity!")
-//                    }
-//                    context.startActivity(intent)
-//                }
-//            ) {
-//                Text("go to SecondActivity")
-//            }
-//        }
-//    }
-//}
-
 @Composable
-fun SimpleNavigation() {
+fun MainScreen() {
     val navController = rememberNavController()
 
-    // Список экранов из sealed class
     val screens = listOf(
-        Screen.Home
+        Screen.Home,
+        Screen.Profile,
+        Screen.Settings
     )
 
+    val context = LocalContext.current
+
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         bottomBar = {
             NavigationBar {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -87,27 +62,23 @@ fun SimpleNavigation() {
 
                 screens.forEach { screen ->
                     NavigationBarItem(
-                        // Без иконок, только текст
                         label = {
                             Text(
                                 text = when (screen) {
-                                    is Screen.Home -> "Главная"
+                                    is Screen.Home -> "Main";
+                                    is Screen.Profile -> "Profile"
+                                    is Screen.Settings -> "Settings"
                                 }
                             )
                         },
-                        // Для иконки используем пустой компонент, так как параметр обязателен
                         icon = {},
                         selected = currentRoute == screen.route,
                         onClick = {
-                            // Навигация с использованием sealed class
                             navController.navigate(screen.route) {
-                                // Очищаем стек до начального пункта назначения
                                 popUpTo(navController.graph.startDestinationId) {
                                     saveState = true
                                 }
-                                // Избегаем множественных копий
                                 launchSingleTop = true
-                                // Восстанавливаем состояние
                                 restoreState = true
                             }
                         }
@@ -116,13 +87,38 @@ fun SimpleNavigation() {
             }
         }
     ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Home.route,
-            modifier = Modifier.padding(innerPadding)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            composable(Screen.Home.route) {
-                HomeScreen()
+            Button(
+                onClick = {
+                    val intent = Intent(context, SecondActivity::class.java).apply {
+                        putExtra("key_data", "Hello from MainActivity!")
+                    }
+                    context.startActivity(intent)
+                }
+            ) {
+                Text("go to SecondActivity")
+            }
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Home.route,
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                composable(Screen.Home.route) {
+                    HomeScreen()
+                }
+                composable(Screen.Profile.route) {
+                    ProfileScreen()
+                }
+                composable(Screen.Settings.route) {
+                    SettingsScreen()
+                }
             }
         }
     }

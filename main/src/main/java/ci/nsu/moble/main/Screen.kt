@@ -9,4 +9,6 @@ sealed class Screen(
     @StringRes val resourceId: Int
 ) {
     object Home : Screen("home", R.string.home)
+    object Profile : Screen("profile", R.string.profile)
+    object Settings : Screen("settings", R.string.settings)
 }
