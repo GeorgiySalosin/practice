@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
@@ -15,6 +14,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ci.nsu.mobile.main.ui.theme.PracticeTheme
 import ci.nsu.mobile.main.TemperatureViewModel
+
+import androidx.compose.ui.graphics.Color
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,19 +54,12 @@ fun TemperatureConverterScreen(
         )
 
         // Celsius textbox
-        OutlinedTextField(
+        TemperatureTextField(
             value = uiState.celsius,
             onValueChange = { viewModel.onCelsiusChanged(it) },
-            label = { Text("°C") },
-            placeholder = { Text("36,6") },
+            label = "°C",
+            placeholder = "36,6",
             isError = uiState.celsius.isNotBlank() && !uiState.isCelsiusValid,
-            supportingText = {
-                if (uiState.celsius.isNotBlank() && !uiState.isCelsiusValid) {
-                    Text("Entewr a valid number!")
-                }
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -74,25 +68,19 @@ fun TemperatureConverterScreen(
         // Convert symbol
         Text(
             text = "⇅",
+            color = Color(196,196,196),
             style = MaterialTheme.typography.headlineSmall
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Fhrnht textbox
-        OutlinedTextField(
+        TemperatureTextField(
             value = uiState.fahrenheit,
             onValueChange = { viewModel.onFahrenheitChanged(it) },
-            label = { Text("°F") },
-            placeholder = { Text("400") },
+            label = "°F",
+            placeholder = "400",
             isError = uiState.fahrenheit.isNotBlank() && !uiState.isFahrenheitValid,
-            supportingText = {
-                if (uiState.fahrenheit.isNotBlank() && !uiState.isFahrenheitValid) {
-                    Text("Entewr a valid number!")
-                }
-            },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-            singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
 
@@ -119,4 +107,35 @@ fun TemperatureConverterScreen(
             }
         }
     }
+}
+
+@Composable
+fun TemperatureTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    placeholder: String,
+    isError: Boolean,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(label) },
+        placeholder = {
+            Text(
+                text = placeholder,
+                color = Color(196,196,196)
+            )
+        },
+        isError = isError,
+        supportingText = {
+            if (isError) {
+                Text("Enter a valid number!")
+            }
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        singleLine = true,
+        modifier = modifier.fillMaxWidth()
+    )
 }
