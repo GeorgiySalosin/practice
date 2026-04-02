@@ -1,6 +1,7 @@
 package ci.nsu.mobile.main
 
 import android.os.Bundle
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -63,7 +64,8 @@ fun DepositCalculatorApp() {
         MainScreen(
             modifier = Modifier.padding(innerPadding),
             onCalculateClick = {
-                // TODO
+                val intent = Intent(context, Stage01Activity::class.java)
+                context.startActivity(intent)
             },
             onHistoryClick = {
                 // TODO
