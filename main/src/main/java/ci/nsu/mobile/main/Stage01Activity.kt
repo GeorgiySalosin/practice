@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -35,12 +36,34 @@ import androidx.compose.ui.unit.sp
 import ci.nsu.mobile.main.ui.theme.PracticeTheme
 
 class Stage01Activity : ComponentActivity() {
+
+    // Регистрируем launcher для получения результата от Stage02Activity
+    private val stage02Launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            // Получаем данные обратно из Stage02Activity
+            val returnedDeposit = result.data?.getStringExtra("RETURNED_DEPOSIT")
+            val returnedTerm = result.data?.getStringExtra("RETURNED_TERM")
+
+            // Обновляем состояние через intent, чтобы compose их подхватил
+            intent.putExtra("RETURNED_DEPOSIT", returnedDeposit)
+            intent.putExtra("RETURNED_TERM", returnedTerm)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             PracticeTheme {
-                Stage01Screen()
+                Stage01Screen(
+                    onNavigateToStage02 = { deposit, term ->
+                        val intent = Intent(this, Stage02Activity::class.java).apply {
+                            putExtra("INITIAL_DEPOSIT", deposit)
+                            putExtra("TERM_MONTHS", term)
+                        }
+                        stage02Launcher.launch(intent)
+                    }
+                )
             }
         }
     }
@@ -48,10 +71,18 @@ class Stage01Activity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Stage01Screen() {
+fun Stage01Screen(
+    onNavigateToStage02: (Double, Int) -> Unit = { _, _ -> }
+) {
     val context = LocalContext.current
-    var initialDeposit by remember { mutableStateOf("") }
-    var termMonths by remember { mutableStateOf("") }
+
+    // TO GET DATA BACK IF RETURNING FROM STAGE 2
+    val activity = context as? ComponentActivity
+    val savedDeposit = activity?.intent?.getStringExtra("RETURNED_DEPOSIT")
+    val savedTerm = activity?.intent?.getStringExtra("RETURNED_TERM")
+
+    var initialDeposit by remember { mutableStateOf(savedDeposit ?: "") }
+    var termMonths by remember { mutableStateOf(savedTerm ?: "") }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -130,15 +161,15 @@ fun Stage01Screen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Кнопка "Далее"
             Button(
                 onClick = {
-                    // TODO: второй этап
-
                     if (initialDeposit.isNotEmpty() && termMonths.isNotEmpty() &&
                         initialDeposit.toDoubleOrNull() != null && termMonths.toIntOrNull() != null) {
-                        // val intent = Intent(context, Stage02Activity::class.java)
-                        // context.startActivity(intent)
+
+                        onNavigateToStage02(
+                            initialDeposit.toDouble(),
+                            termMonths.toInt()
+                        )
                     }
                 },
                 modifier = Modifier

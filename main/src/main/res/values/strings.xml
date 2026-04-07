@@ -3,4 +3,5 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_stage1">Stage1</string>
     <string name="title_activity_stage01">Stage01Activity</string>
+    <string name="title_activity_stage02">Stage02Activity</string>
 </resources>
