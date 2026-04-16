@@ -216,7 +216,36 @@ fun Stage02Screen(initialDeposit: Double, termMonths: Int) {
                 }
             }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+
+                // TO STAGE 3
+            Button(
+                onClick = {
+                    if (selectedDeposit != null) {
+
+                        val intent = Intent(context, Stage03Activity::class.java).apply {
+                            putExtra("INITIAL_DEPOSIT", initialDeposit)
+                            putExtra("TERM_MONTHS", termMonths)
+                            putExtra("INTEREST_RATE", selectedDeposit!!.interestRate)
+                            putExtra("DEPOSIT_NAME", selectedDeposit!!.name)
+                        }
+                        context.startActivity(intent)
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                enabled = selectedDeposit != null
+            ) {
+                Text(text = "Рассчитать", fontSize = 16.sp)
+            }
+
+
             Spacer(modifier = Modifier.height(32.dp))
+
+
+            // BACK TO STAGE 1
 
             Button(
                 onClick = {
@@ -237,19 +266,7 @@ fun Stage02Screen(initialDeposit: Double, termMonths: Int) {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = {
-                    if (selectedDeposit != null) {
-                        // TODO: Переход к финальному расчету
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = selectedDeposit != null
-            ) {
-                Text(text = "Рассчитать", fontSize = 16.sp)
-            }
+
         }
     }
 }

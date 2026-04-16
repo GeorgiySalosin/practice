@@ -1,47 +1,276 @@
 package ci.nsu.mobile.main
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ci.nsu.mobile.main.ui.theme.PracticeTheme
+import androidx.compose.foundation.layout.Row
 
 class Stage03Activity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Data from previous screen
+        val initialDeposit = intent.getDoubleExtra("INITIAL_DEPOSIT", 0.0)
+        val termMonths = intent.getIntExtra("TERM_MONTHS", 0)
+        val interestRate = intent.getDoubleExtra("INTEREST_RATE", 0.0)
+        val depositName = intent.getStringExtra("DEPOSIT_NAME") ?: ""
+
+        // Resulting summ
+        val totalAmount = calculateTotalAmount(initialDeposit, termMonths, interestRate)
+        val earnedInterest = totalAmount - initialDeposit
+
         setContent {
             PracticeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+                Stage03Screen(
+                    initialDeposit = initialDeposit,
+                    termMonths = termMonths,
+                    interestRate = interestRate,
+                    totalAmount = totalAmount,
+                    earnedInterest = earnedInterest,
+                    depositName = depositName
+                )
+            }
+        }
+    }
+
+    private fun calculateTotalAmount(initialDeposit: Double, months: Int, rate: Double): Double {
+        // Simple : sum * (1 + rate * (months -> years))
+        val years = months / 12.0
+        return initialDeposit * (1 + (rate / 100) * years)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Stage03Screen(
+    initialDeposit: Double,
+    termMonths: Int,
+    interestRate: Double,
+    totalAmount: Double,
+    earnedInterest: Double,
+    depositName: String
+) {
+    val context = LocalContext.current
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Расчёт вкладов - Результат",
+                        fontSize = 20.sp
+                    )
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // Карточка с результатами расчета
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 32.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    // Заголовок карточки
+                    Text(
+                        text = "Результаты расчёта",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = depositName,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Стартовый взнос
+                    ResultRow(
+                        label = "Стартовый взнос:",
+                        value = String.format("%.2f ₽", initialDeposit)
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Срок вклада
+                    ResultRow(
+                        label = "Срок вклада:",
+                        value = "$termMonths месяцев"
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Процентная ставка
+                    ResultRow(
+                        label = "Процентная ставка:",
+                        value = String.format("%.2f%%", interestRate)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Разделитель
+                    androidx.compose.material3.Divider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.outline
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Начисленные проценты
+                    ResultRow(
+                        label = "Начисленные проценты:",
+                        value = String.format("%.2f ₽", earnedInterest),
+                        isHighlighted = true
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Итоговая сумма
+                    ResultRow(
+                        label = "Итоговая сумма:",
+                        value = String.format("%.2f ₽", totalAmount),
+                        isTotal = true
                     )
                 }
+            }
+
+            // Кнопка "Сохранить"
+            Button(
+                onClick = {
+                    // TODO: Сохранение расчёта в базу данных
+                    // Пока просто показываем заглушку
+                    android.widget.Toast.makeText(
+                        context,
+                        "Функция сохранения будет добавлена в следующей версии",
+                        android.widget.Toast.LENGTH_SHORT
+                    ).show()
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Text(text = "Сохранить", fontSize = 16.sp)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Кнопка "В начало"
+            Button(
+                onClick = {
+                    // Возврат на главный экран
+                    val intent = Intent(context, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Text(text = "В начало", fontSize = 16.sp)
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun ResultRow(
+    label: String,
+    value: String,
+    isHighlighted: Boolean = false,
+    isTotal: Boolean = false
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            fontSize = if (isTotal) 18.sp else 16.sp,
+            fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Normal,
+            color = if (isHighlighted) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.onSurface
+        )
+
+        Text(
+            text = value,
+            fontSize = if (isTotal) 18.sp else 16.sp,
+            fontWeight = if (isTotal) FontWeight.Bold else FontWeight.Medium,
+            color = if (isHighlighted) MaterialTheme.colorScheme.primary
+            else if (isTotal) MaterialTheme.colorScheme.secondary
+            else MaterialTheme.colorScheme.onSurface
+        )
+    }
 }
+
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun Stage03ScreenPreview() {
     PracticeTheme {
-        Greeting("Android")
+        Stage03Screen(
+            initialDeposit = 100000.0,
+            termMonths = 12,
+            interestRate = 7.2,
+            totalAmount = 107200.0,
+            earnedInterest = 7200.0,
+            depositName = "Премиум вклад"
+        )
     }
 }

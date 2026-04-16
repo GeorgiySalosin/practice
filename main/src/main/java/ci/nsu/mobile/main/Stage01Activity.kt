@@ -145,21 +145,6 @@ fun Stage01Screen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Navigation
-            Button(
-                onClick = {
-                    val intent = Intent(context, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(intent)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text(text = "Назад", fontSize = 16.sp)
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
 
             Button(
                 onClick = {
@@ -180,6 +165,27 @@ fun Stage01Screen(
             ) {
                 Text(text = "Далее", fontSize = 16.sp)
             }
+
+
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+
+            // Navigation
+            Button(
+                onClick = {
+                    val intent = Intent(context, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+                    context.startActivity(intent)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Text(text = "Назад", fontSize = 16.sp)
+            }
+
+
         }
     }
 }
