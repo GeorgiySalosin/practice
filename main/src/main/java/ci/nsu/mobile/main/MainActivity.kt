@@ -68,7 +68,8 @@ fun DepositCalculatorApp() {
                 context.startActivity(intent)
             },
             onHistoryClick = {
-                // TODO
+                val intent = Intent(context, HistoryActivity::class.java)
+                context.startActivity(intent)
             },
             onCloseClick = {
                 (context as? android.app.Activity)?.finish()

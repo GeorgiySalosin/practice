@@ -225,9 +225,22 @@ fun Stage03Screen(
                             )
                             repository.insertCalculation(calculation)
 
-                            snackbarHostState.showSnackbar("Расчёт успешно сохранён!")
+                            // Показываем Toast вместо Snackbar
+                            android.widget.Toast.makeText(
+                                context,
+                                "Расчёт успешно сохранён!",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
+
+                            // Переход на главный экран
+                            navigateToMainScreen(context)
+
                         } catch (e: Exception) {
-                            snackbarHostState.showSnackbar("Ошибка при сохранении: ${e.message}")
+                            android.widget.Toast.makeText(
+                                context,
+                                "Ошибка при сохранении: ${e.message}",
+                                android.widget.Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 },
@@ -240,13 +253,10 @@ fun Stage03Screen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // To main screen
+// To main screen
             Button(
                 onClick = {
-                    // Return back to main screen
-                    val intent = Intent(context, MainActivity::class.java)
-                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
-                    context.startActivity(intent)
+                    navigateToMainScreen(context)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -256,6 +266,14 @@ fun Stage03Screen(
             }
         }
     }
+}
+
+
+// Go back to main screen
+private fun navigateToMainScreen(context: android.content.Context) {
+    val intent = Intent(context, MainActivity::class.java)
+    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+    context.startActivity(intent)
 }
 
 @Composable

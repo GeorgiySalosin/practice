@@ -9,4 +9,5 @@
     <string name="title_activity_deposit_dao">DepositDao</string>
     <string name="title_activity_database">Database</string>
     <string name="title_activity_deposit_repository">DepositRepository</string>
+    <string name="title_activity_history">HistoryActivity</string>
 </resources>

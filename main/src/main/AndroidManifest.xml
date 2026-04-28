@@ -9,6 +9,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Draft">
         <activity
+            android:name=".HistoryActivity"
+            android:exported="false"
+            android:label="@string/title_activity_history"
+            android:theme="@style/Theme.Draft" />
+        <activity
             android:name=".data.DepositRepository"
             android:exported="false"
             android:label="@string/title_activity_deposit_repository"
