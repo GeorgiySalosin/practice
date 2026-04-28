@@ -2,6 +2,7 @@ package ci.nsu.mobile.main
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,6 +44,7 @@ import ci.nsu.mobile.main.data.DepositCalculation
 import ci.nsu.mobile.main.data.DepositRepository
 import kotlinx.coroutines.launch
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 class Stage03Activity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -99,6 +101,14 @@ fun Stage03Screen(
     val database = remember { AppDatabase.getDatabase(context) }
     val repository = remember { DepositRepository(database.depositDao()) }
 
+    val viewModel: Stage03ViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return Stage03ViewModel(repository) as T
+            }
+        }
+    )
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -212,37 +222,21 @@ fun Stage03Screen(
             // SaveTO Database
             Button(
                 onClick = {
-                    scope.launch {
-                        try {
-                            val calculation = DepositCalculation(
-                                initialAmount = initialDeposit,
-                                periodMonths = termMonths,
-                                interestRate = interestRate,
-                                finalAmount = totalAmount,
-                                interestEarned = earnedInterest,
-                                depositName = depositName,
-                                calculationDate = System.currentTimeMillis()
-                            )
-                            repository.insertCalculation(calculation)
-
-                            // Показываем Toast вместо Snackbar
-                            android.widget.Toast.makeText(
-                                context,
-                                "Расчёт успешно сохранён!",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
-
-                            // Переход на главный экран
+                    viewModel.saveCalculation(
+                        initialDeposit = initialDeposit,
+                        termMonths = termMonths,
+                        interestRate = interestRate,
+                        finalAmount = totalAmount,
+                        interestEarned = earnedInterest,
+                        depositName = depositName,
+                        onSuccess = {
+                            Toast.makeText(context, "Расчёт успешно сохранён!", Toast.LENGTH_SHORT).show()
                             navigateToMainScreen(context)
-
-                        } catch (e: Exception) {
-                            android.widget.Toast.makeText(
-                                context,
-                                "Ошибка при сохранении: ${e.message}",
-                                android.widget.Toast.LENGTH_SHORT
-                            ).show()
+                        },
+                        onError = { errorMessage ->
+                            Toast.makeText(context, "Ошибка при сохранении: $errorMessage", Toast.LENGTH_SHORT).show()
                         }
-                    }
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()

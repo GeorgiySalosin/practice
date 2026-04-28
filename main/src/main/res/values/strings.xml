@@ -10,4 +10,8 @@
     <string name="title_activity_database">Database</string>
     <string name="title_activity_deposit_repository">DepositRepository</string>
     <string name="title_activity_history">HistoryActivity</string>
+    <string name="title_activity_stage01_view_model">Stage01ViewModel</string>
+    <string name="title_activity_stage02_view_model">Stage02ViewModel</string>
+    <string name="title_activity_stage03_view_model">Stage03ViewModel</string>
+    <string name="title_activity_history_view_model">HistoryViewModel</string>
 </resources>

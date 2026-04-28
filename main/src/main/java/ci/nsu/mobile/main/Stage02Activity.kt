@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ci.nsu.mobile.main.ui.theme.PracticeTheme
+
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class Stage02Activity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,8 +74,9 @@ data class DepositOption(
 @Composable
 fun Stage02Screen(initialDeposit: Double, termMonths: Int) {
     val context = LocalContext.current
-    var selectedDeposit by remember { mutableStateOf<DepositOption?>(null) }
-    var expanded by remember { mutableStateOf(false) }
+    val viewModel: Stage02ViewModel = viewModel()
+    val selectedDeposit by viewModel.selectedDeposit.collectAsStateWithLifecycle()
+    val expanded by viewModel.expanded.collectAsStateWithLifecycle()
 
     val depositOptions = listOf(
         DepositOption(1, "Базовый вклад", 10000.0, 500000.0, 6, 12, 25.5),
@@ -143,7 +148,7 @@ fun Stage02Screen(initialDeposit: Double, termMonths: Int) {
 
             ExposedDropdownMenuBox(
                 expanded = expanded,
-                onExpandedChange = { expanded = it },
+                onExpandedChange = { viewModel.setExpanded(it) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 OutlinedTextField(
@@ -160,7 +165,7 @@ fun Stage02Screen(initialDeposit: Double, termMonths: Int) {
 
                 ExposedDropdownMenu(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false },
+                    onDismissRequest = { viewModel.setExpanded(false) },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     filteredDeposits.forEach { (deposit, isAvailable) ->
@@ -183,8 +188,8 @@ fun Stage02Screen(initialDeposit: Double, termMonths: Int) {
                             },
                             onClick = {
                                 if (isAvailable) {
-                                    selectedDeposit = deposit
-                                    expanded = false
+                                    viewModel.selectDeposit(deposit)
+                                    viewModel.setExpanded(false)
                                 }
                             },
                             enabled = isAvailable,

@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ci.nsu.mobile.main.ui.theme.PracticeTheme
+
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 class Stage01Activity : ComponentActivity() {
 
@@ -78,11 +82,17 @@ fun Stage01Screen(
 
     // TO GET DATA BACK IF RETURNING FROM STAGE 2
     val activity = context as? ComponentActivity
+
+
+    val viewModel: Stage01ViewModel = viewModel()
+    val initialDeposit by viewModel.initialDeposit.collectAsStateWithLifecycle()
+    val termMonths by viewModel.termMonths.collectAsStateWithLifecycle()
+
     val savedDeposit = activity?.intent?.getStringExtra("RETURNED_DEPOSIT")
     val savedTerm = activity?.intent?.getStringExtra("RETURNED_TERM")
-
-    var initialDeposit by remember { mutableStateOf(savedDeposit ?: "") }
-    var termMonths by remember { mutableStateOf(savedTerm ?: "") }
+    if (savedDeposit != null || savedTerm != null) {
+        viewModel.restoreFromIntent(savedDeposit, savedTerm)
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -112,7 +122,7 @@ fun Stage01Screen(
             // Deposit
             OutlinedTextField(
                 value = initialDeposit,
-                onValueChange = { initialDeposit = it },
+                onValueChange = { viewModel.updateInitialDeposit(it) },
                 label = { Text("Стартовый взнос") },
                 placeholder = { Text("Введите сумму") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -130,7 +140,7 @@ fun Stage01Screen(
             // Duration
             OutlinedTextField(
                 value = termMonths,
-                onValueChange = { termMonths = it },
+                onValueChange = { viewModel.updateTermMonths(it) },
                 label = { Text("Срок вклада (месяцы)") },
                 placeholder = { Text("Введите количество месяцев") },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

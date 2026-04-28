@@ -37,6 +37,9 @@ import ci.nsu.mobile.main.data.DepositRepository
 import ci.nsu.mobile.main.ui.theme.PracticeTheme
 import kotlinx.coroutines.flow.collectLatest
 
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+
 class HistoryActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,17 +56,19 @@ class HistoryActivity : ComponentActivity() {
 @Composable
 fun HistoryScreen() {
     val context = LocalContext.current
-    val calculations = remember { mutableStateListOf<DepositCalculation>() }
-
     val database = remember { AppDatabase.getDatabase(context) }
     val repository = remember { DepositRepository(database.depositDao()) }
-
-    LaunchedEffect(Unit) {
-        repository.getAllCalculations().collectLatest { list ->
-            calculations.clear()
-            calculations.addAll(list)
+    val viewModel: HistoryViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return HistoryViewModel(repository) as T
+            }
         }
-    }
+    )
+
+    val calculations by viewModel.calculations.collectAsStateWithLifecycle()
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
