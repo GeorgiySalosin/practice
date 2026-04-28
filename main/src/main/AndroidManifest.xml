@@ -9,6 +9,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Draft">
         <activity
+            android:name=".data.DepositRepository"
+            android:exported="false"
+            android:label="@string/title_activity_deposit_repository"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.Database"
+            android:exported="false"
+            android:label="@string/title_activity_database"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.DepositDao"
+            android:exported="false"
+            android:label="@string/title_activity_deposit_dao"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.DepositCalculation"
+            android:exported="false"
+            android:label="@string/title_activity_deposit_calculation"
+            android:theme="@style/Theme.Draft" />
+        <activity
             android:name=".Stage03Activity"
             android:exported="false"
             android:label="@string/title_activity_stage03"

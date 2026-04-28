@@ -5,4 +5,8 @@
     <string name="title_activity_stage01">Stage01Activity</string>
     <string name="title_activity_stage02">Stage02Activity</string>
     <string name="title_activity_stage03">Stage03Activity</string>
+    <string name="title_activity_deposit_calculation">DepositCalculation</string>
+    <string name="title_activity_deposit_dao">DepositDao</string>
+    <string name="title_activity_database">Database</string>
+    <string name="title_activity_deposit_repository">DepositRepository</string>
 </resources>

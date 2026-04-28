@@ -32,6 +32,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import ci.nsu.mobile.main.ui.theme.PracticeTheme
 import androidx.compose.foundation.layout.Row
+// database imports
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import ci.nsu.mobile.main.data.AppDatabase
+import ci.nsu.mobile.main.data.DepositCalculation
+import ci.nsu.mobile.main.data.DepositRepository
+import kotlinx.coroutines.launch
+
 
 class Stage03Activity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,6 +91,14 @@ fun Stage03Screen(
     depositName: String
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+
+    // INITIALIZE DATABASE AND REPOS
+    val database = remember { AppDatabase.getDatabase(context) }
+    val repository = remember { DepositRepository(database.depositDao()) }
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -106,7 +125,7 @@ fun Stage03Screen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Карточка с результатами расчета
+            // Calculation results
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -121,7 +140,7 @@ fun Stage03Screen(
                     modifier = Modifier.padding(24.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    // Заголовок карточки
+                    // Title
                     Text(
                         text = "Результаты расчёта",
                         fontSize = 20.sp,
@@ -138,33 +157,33 @@ fun Stage03Screen(
                         color = MaterialTheme.colorScheme.secondary
                     )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
-                    // Стартовый взнос
+                    // Start deposit
                     ResultRow(
                         label = "Стартовый взнос:",
                         value = String.format("%.2f ₽", initialDeposit)
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Срок вклада
+                    // Deposit Term
                     ResultRow(
                         label = "Срок вклада:",
                         value = "$termMonths месяцев"
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Процентная ставка
+                    // Deposit coeff
                     ResultRow(
                         label = "Процентная ставка:",
                         value = String.format("%.2f%%", interestRate)
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    // Разделитель
+
                     androidx.compose.material3.Divider(
                         modifier = Modifier.padding(vertical = 8.dp),
                         color = MaterialTheme.colorScheme.outline
@@ -172,16 +191,16 @@ fun Stage03Screen(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Начисленные проценты
+                    // Total percents
                     ResultRow(
                         label = "Начисленные проценты:",
                         value = String.format("%.2f ₽", earnedInterest),
                         isHighlighted = true
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Итоговая сумма
+                    // Total sum
                     ResultRow(
                         label = "Итоговая сумма:",
                         value = String.format("%.2f ₽", totalAmount),
@@ -190,16 +209,27 @@ fun Stage03Screen(
                 }
             }
 
-            // Кнопка "Сохранить"
+            // SaveTO Database
             Button(
                 onClick = {
-                    // TODO: Сохранение расчёта в базу данных
-                    // Пока просто показываем заглушку
-                    android.widget.Toast.makeText(
-                        context,
-                        "Функция сохранения будет добавлена в следующей версии",
-                        android.widget.Toast.LENGTH_SHORT
-                    ).show()
+                    scope.launch {
+                        try {
+                            val calculation = DepositCalculation(
+                                initialAmount = initialDeposit,
+                                periodMonths = termMonths,
+                                interestRate = interestRate,
+                                finalAmount = totalAmount,
+                                interestEarned = earnedInterest,
+                                depositName = depositName,
+                                calculationDate = System.currentTimeMillis()
+                            )
+                            repository.insertCalculation(calculation)
+
+                            snackbarHostState.showSnackbar("Расчёт успешно сохранён!")
+                        } catch (e: Exception) {
+                            snackbarHostState.showSnackbar("Ошибка при сохранении: ${e.message}")
+                        }
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -210,10 +240,10 @@ fun Stage03Screen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Кнопка "В начало"
+            // To main screen
             Button(
                 onClick = {
-                    // Возврат на главный экран
+                    // Return back to main screen
                     val intent = Intent(context, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
