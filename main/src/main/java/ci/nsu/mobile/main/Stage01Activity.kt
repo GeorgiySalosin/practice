@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,11 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,29 +30,15 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import ci.nsu.mobile.main.ui.theme.PracticeTheme
-
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ci.nsu.mobile.main.ui.theme.PracticeTheme
 
 class Stage01Activity : ComponentActivity() {
-
-    // Регистрируем launcher для получения результата от Stage02Activity
-    private val stage02Launcher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            // Получаем данные обратно из Stage02Activity
-            val returnedDeposit = result.data?.getStringExtra("RETURNED_DEPOSIT")
-            val returnedTerm = result.data?.getStringExtra("RETURNED_TERM")
-
-            // Обновляем состояние через intent, чтобы compose их подхватил
-            intent.putExtra("RETURNED_DEPOSIT", returnedDeposit)
-            intent.putExtra("RETURNED_TERM", returnedTerm)
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             PracticeTheme {
                 Stage01Screen(
@@ -65,7 +47,7 @@ class Stage01Activity : ComponentActivity() {
                             putExtra("INITIAL_DEPOSIT", deposit)
                             putExtra("TERM_MONTHS", term)
                         }
-                        stage02Launcher.launch(intent)
+                        startActivity(intent)
                     }
                 )
             }
@@ -79,31 +61,28 @@ fun Stage01Screen(
     onNavigateToStage02: (Double, Int) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
-
-    // TO GET DATA BACK IF RETURNING FROM STAGE 2
-    val activity = context as? ComponentActivity
-
-
     val viewModel: Stage01ViewModel = viewModel()
     val initialDeposit by viewModel.initialDeposit.collectAsStateWithLifecycle()
     val termMonths by viewModel.termMonths.collectAsStateWithLifecycle()
 
-    val savedDeposit = activity?.intent?.getStringExtra("RETURNED_DEPOSIT")
-    val savedTerm = activity?.intent?.getStringExtra("RETURNED_TERM")
-    if (savedDeposit != null || savedTerm != null) {
-        viewModel.restoreFromIntent(savedDeposit, savedTerm)
+    val activity = context as? ComponentActivity
+    val returnedDeposit = activity?.intent?.getStringExtra("RETURNED_DEPOSIT")
+    val returnedTerm = activity?.intent?.getStringExtra("RETURNED_TERM")
+
+    LaunchedEffect(Unit) {
+        if (!returnedDeposit.isNullOrEmpty() && initialDeposit.isEmpty()) {
+            viewModel.updateInitialDeposit(returnedDeposit)
+        }
+        if (!returnedTerm.isNullOrEmpty() && termMonths.isEmpty()) {
+            viewModel.updateTermMonths(returnedTerm)
+        }
     }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        text = "Расчёт вкладов",
-                        fontSize = 20.sp
-                    )
-                },
+                title = { Text("Расчёт вкладов", fontSize = 20.sp) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
@@ -112,14 +91,10 @@ fun Stage01Screen(
         }
     ) { innerPadding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Deposit
             OutlinedTextField(
                 value = initialDeposit,
                 onValueChange = { viewModel.updateInitialDeposit(it) },
@@ -130,14 +105,12 @@ fun Stage01Screen(
                 isError = initialDeposit.isNotEmpty() && initialDeposit.toDoubleOrNull() == null
             )
 
-            // On error
             if (initialDeposit.isNotEmpty() && initialDeposit.toDoubleOrNull() == null) {
                 ErrorMessage()
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Duration
             OutlinedTextField(
                 value = termMonths,
                 onValueChange = { viewModel.updateTermMonths(it) },
@@ -148,54 +121,39 @@ fun Stage01Screen(
                 isError = termMonths.isNotEmpty() && termMonths.toIntOrNull() == null
             )
 
-            // On error
             if (termMonths.isNotEmpty() && termMonths.toIntOrNull() == null) {
                 ErrorMessage()
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-
             Button(
                 onClick = {
-                    if (initialDeposit.isNotEmpty() && termMonths.isNotEmpty() &&
-                        initialDeposit.toDoubleOrNull() != null && termMonths.toIntOrNull() != null) {
-
+                    if (viewModel.isDataValid()) {
                         onNavigateToStage02(
-                            initialDeposit.toDouble(),
-                            termMonths.toInt()
+                            viewModel.getInitialDepositDouble(),
+                            viewModel.getTermMonthsInt()
                         )
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = initialDeposit.isNotEmpty() && termMonths.isNotEmpty() &&
-                        initialDeposit.toDoubleOrNull() != null && termMonths.toIntOrNull() != null
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                enabled = viewModel.isDataValid()
             ) {
-                Text(text = "Далее", fontSize = 16.sp)
+                Text("Далее", fontSize = 16.sp)
             }
-
-
 
             Spacer(modifier = Modifier.height(16.dp))
 
-
-            // Navigation
             Button(
                 onClick = {
                     val intent = Intent(context, MainActivity::class.java)
                     intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
                     context.startActivity(intent)
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
+                modifier = Modifier.fillMaxWidth().height(56.dp)
             ) {
-                Text(text = "Назад", fontSize = 16.sp)
+                Text("Назад", fontSize = 16.sp)
             }
-
-
         }
     }
 }
@@ -213,7 +171,5 @@ fun ErrorMessage() {
 @Preview(showBackground = true)
 @Composable
 fun Stage01ScreenPreview() {
-    PracticeTheme {
-        Stage01Screen()
-    }
+    PracticeTheme { Stage01Screen() }
 }
