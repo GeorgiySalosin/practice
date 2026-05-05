@@ -1,4 +1,4 @@
-package ci.nsu.mobile.auth.ui.login
+package ci.nsu.mobile.main
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
