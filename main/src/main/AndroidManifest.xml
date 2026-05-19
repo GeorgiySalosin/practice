@@ -9,10 +9,26 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Draft">
         <activity
+            android:name=".RegisterViewModel"
+            android:exported="false"
+            android:label="@string/title_activity_register_view_model"
+            android:theme="@style/Theme.Draft" />
+        <activity
             android:name=".RegisterScreen"
             android:exported="false"
             android:label="@string/title_activity_register_screen"
             android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/title_activity_main"
+            android:theme="@style/Theme.Draft">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".LoginViewModel"
             android:exported="false"
