@@ -12,4 +12,7 @@
     <string name="title_activity_login_request">LoginRequest</string>
     <string name="title_activity_retrofit_client">RetrofitClient</string>
     <string name="title_activity_main_view_model">MainViewModel</string>
+    <string name="title_activity_auth_interceptor">AuthInterceptor</string>
+    <string name="title_activity_api_service">ApiService</string>
+    <string name="title_activity_auth_repository">AuthRepository</string>
 </resources>

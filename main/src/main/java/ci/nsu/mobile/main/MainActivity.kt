@@ -13,13 +13,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import ci.nsu.mobile.main.data.AuthRepository
+import ci.nsu.mobile.main.data.TokenManager
+import ci.nsu.mobile.main.network.RetrofitClient
 import ci.nsu.mobile.main.LoginScreen
+import ci.nsu.mobile.main.LoginViewModel
 import ci.nsu.mobile.main.RegisterScreen
+import ci.nsu.mobile.main.RegisterViewModel
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var tokenManager: TokenManager
+    private lateinit var authRepository: AuthRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        tokenManager = TokenManager(this)
+        val apiService = RetrofitClient.getApiService()
+        authRepository = AuthRepository(apiService, tokenManager)
+
         setContent {
             MaterialTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
@@ -28,20 +42,28 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-}
 
-@Composable
-fun AuthApp() {
-    // rememberSaveable сохраняет состояние при повороте
-    var isLoginScreen by rememberSaveable { mutableStateOf(true) }
+    @Composable
+    fun AuthApp() {
+        var isLoginScreen by rememberSaveable { mutableStateOf(true) }
 
-    if (isLoginScreen) {
-        LoginScreen(
-            onNavigateToRegister = { isLoginScreen = false }
-        )
-    } else {
-        RegisterScreen(
-            onNavigateToLogin = { isLoginScreen = true }
-        )
+        if (isLoginScreen) {
+            val viewModel = LoginViewModel(authRepository)
+            LoginScreen(
+                viewModel = viewModel,
+                onNavigateToRegister = { isLoginScreen = false },
+                onLoginSuccess = {
+                    // TODO: Переход на главный экран
+                    isLoginScreen = false // временно, потом заменим на переход в main
+                }
+            )
+        } else {
+            val viewModel = RegisterViewModel(authRepository)
+            RegisterScreen(
+                viewModel = viewModel,
+                onNavigateToLogin = { isLoginScreen = true },
+                onRegisterSuccess = { isLoginScreen = true }
+            )
+        }
     }
 }

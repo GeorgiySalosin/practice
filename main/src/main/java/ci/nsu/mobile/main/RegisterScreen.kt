@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -32,13 +33,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
-    onNavigateToLogin: () -> Unit = {},
-    viewModel: RegisterViewModel = viewModel()
+    viewModel: RegisterViewModel,
+    onNavigateToLogin: () -> Unit,
+    onRegisterSuccess: () -> Unit  // ← добавьте этот параметр
 ) {
     val firstName by viewModel.firstName.collectAsStateWithLifecycle()
     val lastName by viewModel.lastName.collectAsStateWithLifecycle()
@@ -51,6 +52,8 @@ fun RegisterScreen(
     val password by viewModel.password.collectAsStateWithLifecycle()
     val email by viewModel.email.collectAsStateWithLifecycle()
     val phoneNumber by viewModel.phoneNumber.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
 
     var genderExpanded by remember { mutableStateOf(false) }
     var groupExpanded by remember { mutableStateOf(false) }
@@ -82,7 +85,8 @@ fun RegisterScreen(
                 value = firstName,
                 onValueChange = { viewModel.updateFirstName(it) },
                 label = { Text("Имя") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -91,7 +95,8 @@ fun RegisterScreen(
                 value = lastName,
                 onValueChange = { viewModel.updateLastName(it) },
                 label = { Text("Фамилия") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -100,7 +105,8 @@ fun RegisterScreen(
                 value = middleName,
                 onValueChange = { viewModel.updateMiddleName(it) },
                 label = { Text("Отчество") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -109,7 +115,8 @@ fun RegisterScreen(
                 value = birthDate,
                 onValueChange = { viewModel.updateBirthDate(it) },
                 label = { Text("Дата рождения (ГГГГ-ММ-ДД)") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -127,7 +134,8 @@ fun RegisterScreen(
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = genderExpanded) },
                     modifier = Modifier
                         .menuAnchor()
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    enabled = !isLoading
                 )
 
                 ExposedDropdownMenu(
@@ -148,20 +156,21 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // TODO: Выбор группы из доступных (получить через getGroups)
+            // Выбор группы
             ExposedDropdownMenuBox(
                 expanded = groupExpanded,
                 onExpandedChange = { groupExpanded = it }
             ) {
                 OutlinedTextField(
-                    value = groups.find { it.id == groupId }?.name ?: "",
+                    value = groups.find { it.groupId == groupId }?.groupName ?: "",
                     onValueChange = {},
                     readOnly = true,
                     label = { Text("Группа") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = groupExpanded) },
                     modifier = Modifier
                         .menuAnchor()
-                        .fillMaxWidth()
+                        .fillMaxWidth(),
+                    enabled = groups.isNotEmpty() && !isLoading
                 )
 
                 ExposedDropdownMenu(
@@ -170,9 +179,9 @@ fun RegisterScreen(
                 ) {
                     groups.forEach { group ->
                         DropdownMenuItem(
-                            text = { Text(group.name) },
+                            text = { Text(group.groupName) },
                             onClick = {
-                                viewModel.updateGroupId(group.id)
+                                viewModel.updateGroupId(group.groupId)
                                 groupExpanded = false
                             }
                         )
@@ -187,7 +196,8 @@ fun RegisterScreen(
                 value = login,
                 onValueChange = { viewModel.updateLogin(it) },
                 label = { Text("Логин") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -196,7 +206,8 @@ fun RegisterScreen(
                 value = password,
                 onValueChange = { viewModel.updatePassword(it) },
                 label = { Text("Пароль") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -205,7 +216,8 @@ fun RegisterScreen(
                 value = email,
                 onValueChange = { viewModel.updateEmail(it) },
                 label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -214,31 +226,41 @@ fun RegisterScreen(
                 value = phoneNumber,
                 onValueChange = { viewModel.updatePhoneNumber(it) },
                 label = { Text("Телефон") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading
             )
+
+            if (error != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = error ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 14.sp
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { viewModel.onRegisterClick() },
-                modifier = Modifier.fillMaxWidth().height(56.dp)
+                onClick = { viewModel.onRegisterClick(onRegisterSuccess) },  // ← используем onRegisterSuccess
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                enabled = !isLoading
             ) {
-                Text("Зарегистрироваться", fontSize = 16.sp)
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.height(24.dp))
+                } else {
+                    Text("Зарегистрироваться", fontSize = 16.sp)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TextButton(onClick = onNavigateToLogin) {
+            TextButton(
+                onClick = onNavigateToLogin,
+                enabled = !isLoading
+            ) {
                 Text("Уже есть аккаунт? Войти")
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun RegisterScreenPreview() {
-    MaterialTheme {
-        RegisterScreen()
     }
 }

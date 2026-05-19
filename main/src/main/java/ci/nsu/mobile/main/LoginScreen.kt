@@ -7,8 +7,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -27,19 +30,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 
-
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onNavigateToRegister: () -> Unit = {},
-    viewModel: LoginViewModel = viewModel()
+    viewModel: LoginViewModel,
+    onNavigateToRegister: () -> Unit,
+    onLoginSuccess: () -> Unit
 ) {
     val login by viewModel.login.collectAsStateWithLifecycle()
     val password by viewModel.password.collectAsStateWithLifecycle()
+    val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -58,7 +60,7 @@ fun LoginScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(32.dp)
-            .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -67,7 +69,8 @@ fun LoginScreen(
                 onValueChange = { viewModel.updateLogin(it) },
                 label = { Text("Логин") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                enabled = !isLoading
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -78,33 +81,41 @@ fun LoginScreen(
                 label = { Text("Пароль") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                enabled = !isLoading
             )
+
+            if (error != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = error ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 14.sp
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { viewModel.onLoginClick() },
-                modifier = Modifier.fillMaxWidth().height(56.dp)
+                onClick = { viewModel.onLoginClick(onLoginSuccess) },
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                enabled = !isLoading
             ) {
-                Text("Войти", fontSize = 16.sp)
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.height(24.dp))
+                } else {
+                    Text("Войти", fontSize = 16.sp)
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             TextButton(
-                onClick = onNavigateToRegister
+                onClick = onNavigateToRegister,
+                enabled = !isLoading
             ) {
                 Text("Нет аккаунта? Зарегистрироваться")
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun LoginScreenPreview() {
-    MaterialTheme {
-        LoginScreen()
     }
 }
