@@ -8,15 +8,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import ci.nsu.mobile.main.LoginScreen
 import ci.nsu.mobile.main.RegisterScreen
 
@@ -36,7 +32,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AuthApp() {
-    var isLoginScreen by remember { mutableStateOf(true) }
+    // rememberSaveable сохраняет состояние при повороте
+    var isLoginScreen by rememberSaveable { mutableStateOf(true) }
 
     if (isLoginScreen) {
         LoginScreen(

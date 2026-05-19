@@ -8,6 +8,37 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Draft">
+
+        <activity
+            android:name=".data.network.RetrofitClient"
+            android:exported="false"
+            android:label="@string/title_activity_retrofit_client"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.models.LoginRequest"
+            android:exported="false"
+            android:label="@string/title_activity_login_request"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.models.RegisterRequest"
+            android:exported="false"
+            android:label="@string/title_activity_register_request"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.models.PersonDto"
+            android:exported="false"
+            android:label="@string/title_activity_person_dto"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.models.GroupDto"
+            android:exported="false"
+            android:label="@string/title_activity_group_dto"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.TokenManager"
+            android:exported="false"
+            android:label="@string/title_activity_token_manager"
+            android:theme="@style/Theme.Draft" />
         <activity
             android:name=".RegisterViewModel"
             android:exported="false"
@@ -38,13 +69,7 @@
             android:name=".LoginScreen"
             android:exported="true"
             android:label="@string/title_activity_login_screen"
-            android:theme="@style/Theme.Draft">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:theme="@style/Theme.Draft"></activity>
     </application>
 
 </manifest>
