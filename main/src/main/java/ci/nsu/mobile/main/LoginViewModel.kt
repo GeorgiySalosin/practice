@@ -47,14 +47,18 @@ class LoginViewModel(
             _isLoading.update { true }
             _error.update { null }
 
-            val result = authRepository.login(_login.value, _password.value)
+            try {
+                val result = authRepository.login(_login.value, _password.value)
+                _isLoading.update { false }
 
-            _isLoading.update { false }
-
-            result.onSuccess {
-                onSuccess()
-            }.onFailure { exception ->
-                _error.update { exception.message ?: "Ошибка входа" }
+                if (result.isSuccess) {
+                    onSuccess()
+                } else {
+                    _error.update { result.exceptionOrNull()?.message ?: "Ошибка входа" }
+                }
+            } catch (e: Exception) {
+                _isLoading.update { false }
+                _error.update { e.message ?: "Ошибка выполнения запроса" }
             }
         }
     }

@@ -9,12 +9,18 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -22,7 +28,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,13 +41,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     viewModel: RegisterViewModel,
     onNavigateToLogin: () -> Unit,
-    onRegisterSuccess: () -> Unit  // ← добавьте этот параметр
+    onRegisterSuccess: () -> Unit
 ) {
     val firstName by viewModel.firstName.collectAsStateWithLifecycle()
     val lastName by viewModel.lastName.collectAsStateWithLifecycle()
@@ -57,6 +68,7 @@ fun RegisterScreen(
 
     var genderExpanded by remember { mutableStateOf(false) }
     var groupExpanded by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
 
     val genderOptions = listOf("Мужской", "Женский")
 
@@ -80,7 +92,6 @@ fun RegisterScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Личная информация
             OutlinedTextField(
                 value = firstName,
                 onValueChange = { viewModel.updateFirstName(it) },
@@ -111,17 +122,57 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Поле даты с календарем (как в твоем примере)
             OutlinedTextField(
                 value = birthDate,
-                onValueChange = { viewModel.updateBirthDate(it) },
-                label = { Text("Дата рождения (ГГГГ-ММ-ДД)") },
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Дата рождения") },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading
+                enabled = !isLoading,
+                trailingIcon = {
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Выбрать дату")
+                    }
+                }
             )
+
+            if (showDatePicker) {
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                // Дата будет обработана в onDateSelected через rememberDatePickerState
+                                showDatePicker = false
+                            }
+                        ) {
+                            Text("OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) {
+                            Text("Отмена")
+                        }
+                    }
+                ) {
+                    val datePickerState = rememberDatePickerState()
+                    DatePicker(state = datePickerState)
+
+                    // Обработка выбора даты
+                    LaunchedEffect(datePickerState.selectedDateMillis) {
+                        datePickerState.selectedDateMillis?.let { millis ->
+                            val date = Date(millis)
+                            val format = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                            val formattedDate = format.format(date)
+                            viewModel.updateBirthDate(formattedDate)
+                        }
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Выбор пола
             ExposedDropdownMenuBox(
                 expanded = genderExpanded,
                 onExpandedChange = { genderExpanded = it }
@@ -156,7 +207,6 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Выбор группы
             ExposedDropdownMenuBox(
                 expanded = groupExpanded,
                 onExpandedChange = { groupExpanded = it }
@@ -191,7 +241,6 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Учетные данные
             OutlinedTextField(
                 value = login,
                 onValueChange = { viewModel.updateLogin(it) },
@@ -242,7 +291,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             Button(
-                onClick = { viewModel.onRegisterClick(onRegisterSuccess) },  // ← используем onRegisterSuccess
+                onClick = { viewModel.onRegisterClick(onRegisterSuccess) },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 enabled = !isLoading
             ) {

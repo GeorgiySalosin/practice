@@ -21,4 +21,6 @@ class TokenManager(context: Context) {
     fun clearToken() {
         prefs.edit().remove(KEY_TOKEN).apply()
     }
+
+    fun isLoggedIn(): Boolean = !token.isNullOrEmpty()
 }
