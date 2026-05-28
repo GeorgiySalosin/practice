@@ -4,24 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ci.nsu.mobile.main.data.AuthRepository
 import ci.nsu.mobile.main.data.TokenManager
@@ -37,7 +28,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         tokenManager = TokenManager(this)
-        val apiService = RetrofitClient.getApiService()
+        val apiService = RetrofitClient.getApiService(tokenManager)
         authRepository = AuthRepository(apiService, tokenManager)
 
         setContent {
@@ -52,9 +43,21 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun AuthApp() {
         var isLoginScreen by rememberSaveable { mutableStateOf(true) }
+        var isMainScreen by rememberSaveable { mutableStateOf(false) }
 
-        if (isLoginScreen) {
-            // Создаем ViewModel с фабрикой
+        if (isMainScreen) {
+            val viewModel: MainViewModel = viewModel(
+                factory = MainViewModelFactory(authRepository)
+            )
+            MainScreen(
+                viewModel = viewModel,
+                onLogout = {
+                    tokenManager.clearToken()
+                    isMainScreen = false
+                    isLoginScreen = true
+                }
+            )
+        } else if (isLoginScreen) {
             val viewModel: LoginViewModel = viewModel(
                 factory = LoginViewModelFactory(authRepository)
             )
@@ -63,40 +66,20 @@ class MainActivity : ComponentActivity() {
                 onNavigateToRegister = { isLoginScreen = false },
                 onLoginSuccess = {
                     isLoginScreen = false
+                    isMainScreen = true
                 }
             )
         } else {
-            val isLoggedIn = tokenManager.isLoggedIn()
-
-            if (isLoggedIn) {
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text("Вы вошли в систему", fontSize = 20.sp)
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = {
-                            authRepository.logout()
-                            isLoginScreen = true
-                        }
-                    ) {
-                        Text("Выйти")
-                    }
+            val viewModel: RegisterViewModel = viewModel(
+                factory = RegisterViewModelFactory(authRepository)
+            )
+            RegisterScreen(
+                viewModel = viewModel,
+                onNavigateToLogin = { isLoginScreen = true },
+                onRegisterSuccess = {
+                    isLoginScreen = true
                 }
-            } else {
-                val viewModel: RegisterViewModel = viewModel(
-                    factory = RegisterViewModelFactory(authRepository)
-                )
-                RegisterScreen(
-                    viewModel = viewModel,
-                    onNavigateToLogin = { isLoginScreen = true },
-                    onRegisterSuccess = {
-                        isLoginScreen = true
-                    }
-                )
-            }
+            )
         }
     }
 }

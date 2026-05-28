@@ -4,6 +4,7 @@ import ci.nsu.mobile.main.data.models.GroupDto
 import ci.nsu.mobile.main.data.models.LoginRequest
 import ci.nsu.mobile.main.data.models.LoginResponse
 import ci.nsu.mobile.main.data.models.RegisterRequest
+import ci.nsu.mobile.main.data.models.UserDto
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -19,5 +20,5 @@ interface ApiService {
     suspend fun getGroups(): Response<List<GroupDto>>
 
     @GET("users")
-    suspend fun getUsers(): Response<List<Any>> // TODO: заменить на UserDto
+    suspend fun getUsers(): Response<List<UserDto>>
 }

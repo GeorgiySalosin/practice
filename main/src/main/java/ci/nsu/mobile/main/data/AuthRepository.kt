@@ -1,5 +1,6 @@
 package ci.nsu.mobile.main.data
 
+import ci.nsu.mobile.main.data.models.UserDto
 import ci.nsu.mobile.main.data.models.GroupDto
 import ci.nsu.mobile.main.data.models.LoginRequest
 import ci.nsu.mobile.main.data.models.RegisterRequest
@@ -45,6 +46,20 @@ class AuthRepository(
                 Result.success(response.body()!!)
             } else {
                 Result.failure(Exception("Ошибка загрузки групп: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getUsers(): Result<List<UserDto>> {
+        return try {
+            val response = apiService.getUsers()
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!)
+            } else {
+                val errorBody = response.errorBody()?.string()
+                Result.failure(Exception("Ошибка загрузки пользователей: ${response.code()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)

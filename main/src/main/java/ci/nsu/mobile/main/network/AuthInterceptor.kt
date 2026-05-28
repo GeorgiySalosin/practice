@@ -1,9 +1,12 @@
 package ci.nsu.mobile.main.network
 
+import ci.nsu.mobile.main.data.TokenManager
 import okhttp3.Interceptor
 import okhttp3.Response
 
-class AuthInterceptor : Interceptor {
+class AuthInterceptor(
+    private val tokenManager: TokenManager
+) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
@@ -11,10 +14,9 @@ class AuthInterceptor : Interceptor {
         val requestBuilder = originalRequest.newBuilder()
             .addHeader("Content-Type", "application/json")
 
-        // TODO: добавить токен после реализации TokenManager
-        // token?.let { token ->
-        //     requestBuilder.addHeader("Authorization", "Bearer $token")
-        // }
+        tokenManager.token?.let { token ->
+            requestBuilder.addHeader("Authorization", "Bearer $token")
+        }
 
         return chain.proceed(requestBuilder.build())
     }
