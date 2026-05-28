@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -23,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import ci.nsu.mobile.main.data.AuthRepository
 import ci.nsu.mobile.main.data.TokenManager
 import ci.nsu.mobile.main.network.RetrofitClient
@@ -54,21 +54,21 @@ class MainActivity : ComponentActivity() {
         var isLoginScreen by rememberSaveable { mutableStateOf(true) }
 
         if (isLoginScreen) {
-            val viewModel = LoginViewModel(authRepository)
+            // Создаем ViewModel с фабрикой
+            val viewModel: LoginViewModel = viewModel(
+                factory = LoginViewModelFactory(authRepository)
+            )
             LoginScreen(
                 viewModel = viewModel,
                 onNavigateToRegister = { isLoginScreen = false },
                 onLoginSuccess = {
-                    // После успешного входа показываем главный экран
                     isLoginScreen = false
                 }
             )
         } else {
-            // Проверяем, есть ли токен (пользователь вошел)
             val isLoggedIn = tokenManager.isLoggedIn()
 
             if (isLoggedIn) {
-                // Главный экран
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -86,7 +86,9 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             } else {
-                val viewModel = RegisterViewModel(authRepository)
+                val viewModel: RegisterViewModel = viewModel(
+                    factory = RegisterViewModelFactory(authRepository)
+                )
                 RegisterScreen(
                     viewModel = viewModel,
                     onNavigateToLogin = { isLoginScreen = true },
