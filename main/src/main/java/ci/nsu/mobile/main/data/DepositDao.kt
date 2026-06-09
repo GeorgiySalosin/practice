@@ -13,6 +13,9 @@ interface DepositDao {
     @Query("SELECT * FROM deposit_calculations ORDER BY calculationDate DESC")
     fun getAllCalculations(): Flow<List<DepositCalculation>>
 
+    @Query("SELECT * FROM deposit_calculations WHERE userId = :userId ORDER BY calculationDate DESC")
+    fun getCalculationsByUser(userId: Long): Flow<List<DepositCalculation>>
+
     @Query("SELECT * FROM deposit_calculations ORDER BY calculationDate DESC LIMIT 10")
     suspend fun getLastTenCalculations(): List<DepositCalculation>
 

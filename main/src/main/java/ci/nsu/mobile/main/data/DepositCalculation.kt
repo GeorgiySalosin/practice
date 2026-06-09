@@ -7,11 +7,12 @@ import androidx.room.PrimaryKey
 data class DepositCalculation(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
+    val userId: Long,
     val initialAmount: Double,
     val periodMonths: Int,
     val interestRate: Double,
     val finalAmount: Double,
     val interestEarned: Double,
     val depositName: String,
-    val calculationDate: Long // timestamp
+    val calculationDate: Long            // timestamp
 )

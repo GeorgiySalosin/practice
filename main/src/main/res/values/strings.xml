@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">main</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_stage1">Stage1</string>
     <string name="title_activity_stage01">Stage01Activity</string>
     <string name="title_activity_stage02">Stage02Activity</string>
     <string name="title_activity_stage03">Stage03Activity</string>
@@ -17,7 +16,6 @@
     <string name="title_activity_login_screen">LoginScreen</string>
     <string name="title_activity_login_view_model">LoginViewModel</string>
     <string name="title_activity_register_screen">RegisterScreen</string>
-    <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_register_view_model">RegisterViewModel</string>
     <string name="title_activity_token_manager">TokenManager</string>
     <string name="title_activity_group_dto">GroupDto</string>

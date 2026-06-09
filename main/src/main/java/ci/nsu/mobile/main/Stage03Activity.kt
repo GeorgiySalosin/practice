@@ -45,6 +45,7 @@ import ci.nsu.mobile.main.data.DepositRepository
 import kotlinx.coroutines.launch
 
 import androidx.lifecycle.viewmodel.compose.viewModel
+import ci.nsu.mobile.main.data.TokenManager
 
 class Stage03Activity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,6 +97,8 @@ fun Stage03Screen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    val tokenManager = remember { TokenManager(context) }
+    val userId = tokenManager.userId
 
     // INITIALIZE DATABASE AND REPOS
     val database = remember { AppDatabase.getDatabase(context) }
@@ -223,6 +226,7 @@ fun Stage03Screen(
             Button(
                 onClick = {
                     viewModel.saveCalculation(
+                        userId = userId,
                         initialDeposit = initialDeposit,
                         termMonths = termMonths,
                         interestRate = interestRate,

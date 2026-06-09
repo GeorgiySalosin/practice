@@ -16,10 +16,6 @@ import androidx.compose.ui.Modifier
 import ci.nsu.mobile.main.data.AuthRepository
 import ci.nsu.mobile.main.data.TokenManager
 import ci.nsu.mobile.main.network.RetrofitClient
-import ci.nsu.mobile.main.LoginScreen
-import ci.nsu.mobile.main.LoginViewModel
-import ci.nsu.mobile.main.RegisterScreen
-import ci.nsu.mobile.main.RegisterViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -31,7 +27,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         tokenManager = TokenManager(this)
-        val apiService = RetrofitClient.getApiService()
+        val apiService = RetrofitClient.getApiService() // убедитесь, что этот метод существует
         authRepository = AuthRepository(apiService, tokenManager)
 
         setContent {
@@ -45,16 +41,22 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     fun AuthApp() {
+        // Состояние: залогинен ли пользователь (проверяем SharedPreferences)
+        var isLoggedIn by rememberSaveable { mutableStateOf(tokenManager.isLoggedIn()) }
         var isLoginScreen by rememberSaveable { mutableStateOf(true) }
 
-        if (isLoginScreen) {
+        if (isLoggedIn) {
+            // Показываем главный экран (заглушка)
+            // TODO: заменить на реальный MainScreen с BottomNavigation
+            androidx.compose.material3.Text("Главный экран (список пользователей и расчёты)")
+        } else if (isLoginScreen) {
             val viewModel = LoginViewModel(authRepository)
             LoginScreen(
                 viewModel = viewModel,
                 onNavigateToRegister = { isLoginScreen = false },
                 onLoginSuccess = {
-                    // TODO: Переход на главный экран
-                    isLoginScreen = false // временно, потом заменим на переход в main
+                    // Обновляем состояние при успешном входе
+                    isLoggedIn = tokenManager.isLoggedIn()
                 }
             )
         } else {
@@ -62,7 +64,9 @@ class MainActivity : ComponentActivity() {
             RegisterScreen(
                 viewModel = viewModel,
                 onNavigateToLogin = { isLoginScreen = true },
-                onRegisterSuccess = { isLoginScreen = true }
+                onRegisterSuccess = {
+                    isLoginScreen = true
+                }
             )
         }
     }

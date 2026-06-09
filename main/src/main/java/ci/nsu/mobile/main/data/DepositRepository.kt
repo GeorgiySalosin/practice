@@ -7,6 +7,10 @@ class DepositRepository(private val depositDao: DepositDao) {
     fun getAllCalculations(): Flow<List<DepositCalculation>> =
         depositDao.getAllCalculations()
 
+
+    fun getCalculationsByUser(userId: Long): Flow<List<DepositCalculation>> =
+        depositDao.getCalculationsByUser(userId)
+
     suspend fun insertCalculation(calculation: DepositCalculation) =
         depositDao.insertCalculation(calculation)
 

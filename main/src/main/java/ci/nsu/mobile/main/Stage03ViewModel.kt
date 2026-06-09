@@ -1,6 +1,5 @@
 package ci.nsu.mobile.main
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ci.nsu.mobile.main.data.DepositCalculation
@@ -12,6 +11,7 @@ class Stage03ViewModel(
 ) : ViewModel() {
 
     fun saveCalculation(
+        userId: Long,                              // новый параметр
         initialDeposit: Double,
         termMonths: Int,
         interestRate: Double,
@@ -24,6 +24,7 @@ class Stage03ViewModel(
         viewModelScope.launch {
             try {
                 val calculation = DepositCalculation(
+                    userId = userId,                // передаём userId
                     initialAmount = initialDeposit,
                     periodMonths = termMonths,
                     interestRate = interestRate,
