@@ -9,6 +9,69 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Draft">
         <activity
+            android:name=".HistoryViewModel"
+            android:exported="false"
+            android:label="@string/title_activity_history_view_model"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".Stage03ViewModel"
+            android:exported="false"
+            android:label="@string/title_activity_stage03_view_model"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".Stage02ViewModel"
+            android:exported="false"
+            android:label="@string/title_activity_stage02_view_model"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".Stage01ViewModel"
+            android:exported="false"
+            android:label="@string/title_activity_stage01_view_model"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false"
+            android:label="@string/title_activity_history"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.DepositRepository"
+            android:exported="false"
+            android:label="@string/title_activity_deposit_repository"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.Database"
+            android:exported="false"
+            android:label="@string/title_activity_database"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.DepositDao"
+            android:exported="false"
+            android:label="@string/title_activity_deposit_dao"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".data.DepositCalculation"
+            android:exported="false"
+            android:label="@string/title_activity_deposit_calculation"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".Stage03Activity"
+            android:exported="false"
+            android:label="@string/title_activity_stage03"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".Stage02Activity"
+            android:exported="false"
+            android:label="@string/title_activity_stage02"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".Stage01Activity"
+            android:exported="false"
+            android:label="@string/title_activity_stage01"
+            android:theme="@style/Theme.Draft" />
+        <activity
+            android:name=".Stage1"
+            android:exported="false"
+            android:label="@string/title_activity_stage1"
             android:name=".data.AuthRepository"
             android:exported="false"
             android:label="@string/title_activity_auth_repository"
