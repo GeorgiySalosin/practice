@@ -1,136 +1,68 @@
 package ci.nsu.mobile.main
 
 import android.os.Bundle
-import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import ci.nsu.mobile.main.ui.theme.PracticeTheme
+import ci.nsu.mobile.main.data.AuthRepository
+import ci.nsu.mobile.main.data.TokenManager
+import ci.nsu.mobile.main.network.RetrofitClient
+import ci.nsu.mobile.main.LoginScreen
+import ci.nsu.mobile.main.LoginViewModel
+import ci.nsu.mobile.main.RegisterScreen
+import ci.nsu.mobile.main.RegisterViewModel
 
 class MainActivity : ComponentActivity() {
+
+    private lateinit var tokenManager: TokenManager
+    private lateinit var authRepository: AuthRepository
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        tokenManager = TokenManager(this)
+        val apiService = RetrofitClient.getApiService()
+        authRepository = AuthRepository(apiService, tokenManager)
+
         setContent {
-            PracticeTheme {
-                DepositCalculatorApp()
+            MaterialTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    AuthApp()
+                }
             }
         }
     }
-}
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DepositCalculatorApp() {
-    val context = LocalContext.current
+    @Composable
+    fun AuthApp() {
+        var isLoginScreen by rememberSaveable { mutableStateOf(true) }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Расчёт вкладов",
-                        fontSize = 20.sp
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
-                )
+        if (isLoginScreen) {
+            val viewModel = LoginViewModel(authRepository)
+            LoginScreen(
+                viewModel = viewModel,
+                onNavigateToRegister = { isLoginScreen = false },
+                onLoginSuccess = {
+                    // TODO: Переход на главный экран
+                    isLoginScreen = false // временно, потом заменим на переход в main
+                }
             )
-        }
-    ) { innerPadding ->
-        MainScreen(
-            modifier = Modifier.padding(innerPadding),
-            onCalculateClick = {
-                val intent = Intent(context, Stage01Activity::class.java)
-                context.startActivity(intent)
-            },
-            onHistoryClick = {
-                val intent = Intent(context, HistoryActivity::class.java)
-                context.startActivity(intent)
-            },
-            onCloseClick = {
-                (context as? android.app.Activity)?.finish()
-            }
-        )
-    }
-}
-
-@Composable
-fun MainScreen(
-    modifier: Modifier = Modifier,
-    onCalculateClick: () -> Unit,
-    onHistoryClick: () -> Unit,
-    onCloseClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Button(
-            onClick = onCalculateClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Text(
-                text = "Рассчитать",
-                fontSize = 16.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        Button(
-            onClick = onHistoryClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Text(
-                text = "История расчётов",
-                fontSize = 16.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-
-        Button(
-            onClick = onCloseClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp)
-        ) {
-            Text(
-                text = "Закрыть приложение",
-                fontSize = 16.sp
+        } else {
+            val viewModel = RegisterViewModel(authRepository)
+            RegisterScreen(
+                viewModel = viewModel,
+                onNavigateToLogin = { isLoginScreen = true },
+                onRegisterSuccess = { isLoginScreen = true }
             )
         }
     }
